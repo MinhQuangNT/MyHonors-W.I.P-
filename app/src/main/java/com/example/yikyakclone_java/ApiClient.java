@@ -5,8 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     private static final PostsApi POSTS_API =
-            new Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2:8080/")
+            new Retrofit.Builder() // address for emulator: http://10.0.2.2:8080/
+                    .baseUrl("http://10.0.2.2:8080/")// http://10.192.66.52:8080/ for android apk debug
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
                     .create(PostsApi.class);

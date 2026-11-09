@@ -31,13 +31,9 @@ public class MainActivity extends AppCompatActivity {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Intent data = result.getData();
                     String content = data.getStringExtra("postContent");
-                    String timestamp = new SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
-                            .format(new Date());
-
-                    Post newPost = new Post("Anonymous", content, timestamp, false);
-                    posts.add(0, newPost);
-                    adapter.notifyItemInserted(0);
-                    recyclerView.scrollToPosition(0);
+                    if (content != null && !content.trim().isEmpty()) {
+                        submitPost(content.trim());
+                    }
                 }
             }
     );
@@ -94,5 +90,35 @@ public class MainActivity extends AppCompatActivity {
                 ).show();
             }
         });
+    }
+
+    private void submitPost(String content) {
+        ApiClient.getPostsApi()
+                .createPost(new CreatePostRequest(content))
+                .enqueue(new Callback<Post>() {
+                    @Override
+                    public void onResponse(Call<Post> call, Response<Post> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            posts.add(0, response.body());
+                            adapter.notifyItemInserted(0);
+                            recyclerView.scrollToPosition(0);
+                        } else {
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Failed to send post. Server returned error " + response.code(),
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Post> call, Throwable error) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Couldn't submit post. Check that the server is running.",
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                });
     }
 }
